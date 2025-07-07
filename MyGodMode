@@ -1,36 +1,54 @@
 local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
 local Player = Players.LocalPlayer
 local Character = Player.Character or Player.CharacterAdded:Wait()
 local Humanoid = Character:WaitForChild("Humanoid")
 
 local function setupGodmode()
-    local baseHealth = Humanoid.MaxHealth
-    local isGodmodeActive = true
+    StarterGui:SetCore("SendNotification", {
+        Title = "Godmode Status",
+        Text = "Stealth Godmode ON.",
+        Duration = 5
+    })
+
+    Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+    Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+    Humanoid.MaxHealth = math.huge
+    Humanoid.Health = math.huge
 
     Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
-        if isGodmodeActive and Humanoid.Health <= 0 then
-            Humanoid.Health = baseHealth
-        end
+        Humanoid.Health = math.huge
     end)
 
     spawn(function()
-        while isGodmodeActive do
-            if Humanoid.Health < baseHealth then
-                Humanoid.Health = baseHealth
+        while true do
+            Humanoid.Health = math.huge
+            Humanoid.MaxHealth = math.huge
+            local character = Player.Character or Player.CharacterAdded:Wait()
+            local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+            local parts = workspace:GetPartBoundsInRadius(humanoidRootPart.Position, 10)
+            for _, part in ipairs(parts) do
+                part.CanTouch = false
             end
-            wait(0.05)
+            wait(0.01)
         end
     end)
 
     Player.CharacterAdded:Connect(function(newCharacter)
         Character = newCharacter
         Humanoid = Character:WaitForChild("Humanoid")
-        baseHealth = Humanoid.MaxHealth
+        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
+        Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+        Humanoid.MaxHealth = math.huge
+        Humanoid.Health = math.huge
         Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
-            if isGodmodeActive and Humanoid.Health <= 0 then
-                Humanoid.Health = baseHealth
-            end
+            Humanoid.Health = math.huge
         end)
+        StarterGui:SetCore("SendNotification", {
+            Title = "Godmode Status",
+            Text = "Stealth Godmode ON.",
+            Duration = 5
+        })
     end)
 end
 
@@ -58,4 +76,3 @@ end
 setupBypass()
 spawn(setupGodmode)
 spawn(obfuscate)
-print("Stealth Godmode Activated")
