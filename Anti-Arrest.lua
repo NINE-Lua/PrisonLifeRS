@@ -40,6 +40,7 @@ local function resetAndTeleport()
 	})
 
 	forceResetCharacter()
+	originalPosition = HumanoidRootPart.Position
 
 	local newChar = Player.CharacterAdded:Wait()
 	newChar:WaitForChild("HumanoidRootPart")
