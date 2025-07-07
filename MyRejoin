@@ -4,6 +4,7 @@ local StarterGui = game:GetService("StarterGui")
 local Player = Players.LocalPlayer
 local jobId = game.JobId
 local placeId = game.PlaceId
+local UserInputService = game:GetService("UserInputService")
 
 local function rejoinServer()
     TeleportService:TeleportToPlaceInstance(placeId, jobId, Player)
@@ -32,4 +33,10 @@ end
 
 setupBypass()
 spawn(obfuscate)
-rejoinServer()
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.O then
+        rejoinServer()
+    end
+end)
+
