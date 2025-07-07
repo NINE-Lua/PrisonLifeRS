@@ -1,0 +1,61 @@
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+local function setupGodmode()
+    local baseHealth = Humanoid.MaxHealth
+    local isGodmodeActive = true
+
+    Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+        if isGodmodeActive and Humanoid.Health <= 0 then
+            Humanoid.Health = baseHealth
+        end
+    end)
+
+    spawn(function()
+        while isGodmodeActive do
+            if Humanoid.Health < baseHealth then
+                Humanoid.Health = baseHealth
+            end
+            wait(0.05)
+        end
+    end)
+
+    Player.CharacterAdded:Connect(function(newCharacter)
+        Character = newCharacter
+        Humanoid = Character:WaitForChild("Humanoid")
+        baseHealth = Humanoid.MaxHealth
+        Humanoid:GetPropertyChangedSignal("Health"):Connect(function()
+            if isGodmodeActive and Humanoid.Health <= 0 then
+                Humanoid.Health = baseHealth
+            end
+        end)
+    end)
+end
+
+local function setupBypass()
+    local mt = getrawmetatable(game)
+    local oldIndex = mt.__index
+    setreadonly(mt, false)
+    mt.__index = function(self, key)
+        if key == "Kick" or key == "Ban" then
+            return function() end
+        end
+        return oldIndex(self, key)
+    end
+    setreadonly(mt, true)
+end
+
+local function obfuscate()
+    local dummy = Instance.new("BoolValue")
+    dummy.Name = math.random(100000, 999999) .. "_Obf"
+    dummy.Parent = game.ReplicatedStorage
+    wait(1)
+    dummy:Destroy()
+end
+
+setupBypass()
+spawn(setupGodmode)
+spawn(obfuscate)
+print("Stealth Godmode Activated")
