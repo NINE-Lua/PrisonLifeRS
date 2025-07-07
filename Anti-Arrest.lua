@@ -2,12 +2,11 @@ local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+local originalPosition = HumanoidRootPart.Position
 
-local function waitForCharacter()
-	local character = Player.Character or Player.CharacterAdded:Wait()
-	local hrp = character:WaitForChild("HumanoidRootPart")
-	return character, hrp.Position
-end
+local hasTriggered = false
 
 local function forceResetCharacter()
 	local char = Player.Character
@@ -24,16 +23,19 @@ local function forceResetCharacter()
 			task.wait()
 		end
 		if Player.Character == char then
-			warn("Health reset failed, destroying character manually.")
+			warn("Reset failed, destroying character manually.")
 			char:Destroy()
 		end
 	end)
 end
 
-local function resetAndTeleport(originalPosition)
+local function resetAndTeleport()
+	if hasTriggered then return end
+	hasTriggered = true
+
 	StarterGui:SetCore("SendNotification", {
 		Title = "Reset Status",
-		Text = "Resetting and teleporting back...",
+		Text = "Nearby cuffs detected. Resetting...",
 		Duration = 5
 	})
 
@@ -45,22 +47,32 @@ local function resetAndTeleport(originalPosition)
 	RunService.Heartbeat:Wait()
 
 	newChar.HumanoidRootPart.CFrame = CFrame.new(originalPosition)
+
+	task.delay(5, function()
+		hasTriggered = false
+	end)
 end
 
-local function watchForGuiTrigger()
-	local character, originalPos = waitForCharacter()
-	local head = character:WaitForChild("Head")
+RunService.Heartbeat:Connect(function()
+	local myChar = Player.Character
+	if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return end
 
-	if head:FindFirstChild("Arrest") then
-		resetAndTeleport(originalPos)
-	else
-		head.ChildAdded:Connect(function(child)
-			if child.Name == "Arrest" then
-				resetAndTeleport(originalPos)
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		if otherPlayer ~= Player then
+			local otherChar = otherPlayer.Character
+			if otherChar and otherChar:FindFirstChild("HumanoidRootPart") then
+				local distance = (myChar.HumanoidRootPart.Position - otherChar.HumanoidRootPart.Position).Magnitude
+				if distance <= 5 then
+					local tool = otherChar:FindFirstChildOfClass("Tool")
+					if tool and tool.Name == "Handcuffs" then
+						resetAndTeleport()
+						break
+					end
+				end
 			end
-		end)
+		end
 	end
-end
+end)
 
 local function setupBypass()
 	local mt = getrawmetatable(game)
@@ -85,4 +97,3 @@ end
 
 setupBypass()
 spawn(obfuscate)
-watchForGuiTrigger()
