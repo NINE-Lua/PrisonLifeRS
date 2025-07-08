@@ -1,3 +1,7 @@
+--[[
+	made by me ;)
+]]--
+
 local TweenService = game:GetService("TweenService")
 local Player = game.Players.LocalPlayer
 local Camera = workspace.CurrentCamera
