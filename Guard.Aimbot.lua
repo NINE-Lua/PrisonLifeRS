@@ -42,7 +42,7 @@ local function getFacingTarget()
 		local model = result.Instance:FindFirstAncestorOfClass("Model")
 		if model then
 			local player = Players:GetPlayerFromCharacter(model)
-			if player and player.Team and player.Team.Name == "Guard" then
+			if player and player.Team and player.Team.Name == "Guard" or player.Team.Name == "Swat" then
 				local hrp = model:FindFirstChild(TARGET_PART)
 				if hrp then
 					return hrp
