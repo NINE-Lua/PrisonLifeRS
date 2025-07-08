@@ -42,6 +42,7 @@ local function resetAndTeleport()
     RunService.Heartbeat:Wait()
 
     if hrp and hrp.Parent then
+        wait(1.5)
         hrp.CFrame = CFrame.new(hrp.Position)
     end
 
