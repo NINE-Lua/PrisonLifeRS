@@ -4,8 +4,13 @@ local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
 local StarterGui = game:GetService("StarterGui")
 
-local enabled = false
+local enabled = true
 local lastPosition = nil
+StarterGui:SetCore("SendNotification", {
+    Title = "William Afton Mode ACTIVATED.",
+    Text = "To turn off/on, press 'Y'.",
+    Duration = 5.5
+})
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if gameProcessed then return end
