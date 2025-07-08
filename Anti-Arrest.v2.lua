@@ -1,9 +1,12 @@
+-- v2
+
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
 
 local hasTriggered = false
+local originalPosition = nil
 
 local function forceResetCharacter()
     local char = Player.Character
@@ -24,9 +27,28 @@ local function forceResetCharacter()
     end)
 end
 
+local function teleportToOriginalPosition(char)
+    local hrp = char:WaitForChild("HumanoidRootPart")
+
+    for i = 1, 5 do
+        if hrp and hrp.Parent then
+            hrp.CFrame = CFrame.new(originalPosition)
+        end
+        task.wait(0.1)
+    end
+end
+
 local function resetAndTeleport()
     if hasTriggered then return end
     hasTriggered = true
+
+    local char = Player.Character
+    if not char then return end
+
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+
+    originalPosition = hrp.Position
 
     StarterGui:SetCore("SendNotification", {
         Title = "Reset Status",
@@ -37,14 +59,8 @@ local function resetAndTeleport()
     forceResetCharacter()
 
     local newChar = Player.CharacterAdded:Wait()
-    local hrp = newChar:WaitForChild("HumanoidRootPart")
 
-    RunService.Heartbeat:Wait()
-
-    if hrp and hrp.Parent then
-        wait(1.5)
-        hrp.CFrame = CFrame.new(hrp.Position)
-    end
+    teleportToOriginalPosition(newChar)
 
     task.delay(2, function()
         hasTriggered = false
