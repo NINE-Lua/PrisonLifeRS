@@ -47,7 +47,7 @@ local function getFacingTarget()
 				if hrp then
 					return hrp
 				end
-			elseif if player and player.Team and player.Team.Name == "Swat" then
+			elseif player and player.Team and player.Team.Name == "Swat" then
 				local hrp = model:FindFirstChild(TARGET_PART)
 				if hrp then
 					return hrp
